@@ -1,0 +1,191 @@
+2010-01-05  Rob Crittenden <rcritten@redhat.com>
+
+	* nss_compat_ossl 0.9.6 released.
+
+2010-01-04  Rob Crittenden <rcritten@redhat.com>
+
+	* Fixes the SSLv23_[server|client]_method() and only sets
+	  SSL_V2_COMPATIBLE_HELLO when SSLv2 is enabled to be more complaint
+	  with the OpenSSL API.
+
+	* Added 4 DH ciphers (for clients only) and enabled AES by default.
+
+	* Changed the way that ssl_set_cipher_list() determines its return
+	  value.  
+
+2009-04-29  Rob Crittenden <rcritten@redhat.com>
+
+	* Implement SSL_CTX_set_default_verify_paths()
+
+2009-04-20  Rob Crittenden <rcritten@redhat.com>
+
+	* nss_compat_ossl 0.9.5 released.
+
+2009-04-20  Rob Crittenden <rcritten@redhat.com>
+	* Ensure that an SSL context exists before doing anything. Since
+	  we can't catch NSS initialization failures at init time we have
+	  to catch them later (like this).
+
+2009-03-06  Rich Megginson <rmeggins@redhat.com>
+
+	* Change license to MIT style license
+
+2008-09-12  Rob Crittenden <rcritten@redhat.com>
+
+	* Use proper NSPR header file (even though marked as private)
+	* Don't use PR_GetRandomNoise(), it isn't truly random. Use
+	  PK11_GenerateRandom()
+
+2008-07-02  Rob Crittenden <rcritten@redhat.com>
+
+	* nss_compat_ossl has some BIO emulation code that links a BIO object
+	  in as an NSPR layer. This code 1) did not implement enough of the
+	  layer to make SSL happy, and 2) linked the layer at the wrong point
+	  in the stack. (453651) Contributed by Bob Relyea
+
+2007-10-16  Rob Crittenden <rcritten@redhat.com>
+
+	* Use pkg-config to get the list of NSPR and NSS libraries to link with.
+
+2007-10-13  Rob Crittenden <rcritten@redhat.com>
+
+	* Don't explicitly link with libsoftokn3.so (330091)
+
+2007-10-13  Rob Crittenden <rcritten@redhat.com>
+
+	* Reverting change to remove #define CERT_NewTempCertificate (306711)
+	  This needs to be there otherwise there is an undefined symbol
+
+2007-09-20  Rob Crittenden <rcritten@redhat.com>
+
+	* nss_compat_ossl 0.9.2 released.
+
+2007-09-20  Rob Crittenden <rcritten@redhat.com>
+
+	* Fix some compiler warnings
+
+2007-09-20  Rob Crittenden <rcritten@redhat.com>
+
+	* The license is LGPLv2.1. I had wrongly included both a LGPL
+	  LICENSE file AND the GPL 2 COPYING file. LICENSE was removed
+	  in a separate update, this fixes COPYING.
+
+2007-09-20  Rob Crittenden <rcritten@redhat.com>
+
+	* Patch submitted by Miloslav Trmac (259901)
+	  * Define PEM_BUFSIZE
+	  * Use a better X509_STORE_CTX (with ->current_cert, ->error)
+	  * Add a dummy PEM_def_callback
+	  * Add SSLv2_server_method
+	  * Add X509_LU_X509, X509_STORE_get_by_subject
+	  * Add SSL_get_ex_data_X509_STORE_CTX_idx, and a stub for
+	    X509_STORE_CTX_get_ex_data
+	  * Uncomment declaration of SSL_state_string_long.  Return at least
+	    some string instead of NULL.
+	  * Fix prototype of CRYPTO_set_locking_callback
+	  * Use PK11_GenerateRandom, not PR_GetRandomNoise for RAND_write_file:
+	    RAND_write_file is used to keep a persistent random seed across
+	    stunnel runs, it is not really necessary to generate a truly random
+	    seed each time.  Besides, reading 1024 bytes from /dev/random takes
+	    way too long.
+	  * Don't call fclose(NULL) in RAND_write_file
+	  * Return NULL from SSL_get_peer_certificate if no peer certificate is
+	    available
+	  * Decide whether to allocate memory in X509_NAME_oneline based on
+	    the passed buffer, not its size
+
+2007-09-14  Rob Crittenden <rcritten@redhat.com>
+
+	* Change name of PKCS#11 module to libnsspem.so
+	* Import some improvements made during curl development
+
+2007-08-29  Rob Crittenden <rcritten@redhat.com>
+
+	* nss_compat_ossl 0.9.1 released.
+
+2007-08-06  Rob Crittenden <rcritten@redhat.com>
+
+	* Remove conflicting LICENSE file (the library is LGPL, not GPL).
+	  The file COPYING was correct.
+	* Provide a more usable README
+
+2007-07-25  Rob Crittenden <rcritten@redhat.com>
+
+	* Import into repository. Lost 17 revisions of the history in the
+	  migration.
+
+2007-05-29  Rob Crittenden <rcritten@redhat.com>
+
+	* Handle the SSL verify modes for clients as well
+
+2007-05-29  Rob Crittenden <rcritten@redhat.com>
+
+	* In X509_NAME_oneline() use the certificate arena to allocate memory
+
+2007-05-24  Rob Crittenden <rcritten@redhat.com>
+
+	* Handle authenticating a PKCS#11 PEM token. If an encrypted key PEM is
+	  provided then the module will correctly prompt for the PIN
+	* Initialize the certificate nickname to NULL
+	* Check the return result of PK11_CreateGenericObject()
+	* After a certificate is selected make sure it exists. Better to catch
+	  this earlier than later
+	* Fix SSL_want() to return a legal value (SSL_NOTHING)
+	* Fix some compiler warnings
+
+2007-05-14  Rob Crittenden <rcritten@redhat.com>
+
+	* First cut at loading PEM files on the fly by using a PKCS#11 module
+	  that can read them. This is currently disabled as it requires the
+	  NSS tip (3.12) and some additional patches.
+	  If a filename does not contain a slash (/) then it is considered
+	  to be a regular NSS nickname and the NSS Certificate DB token is
+	  used.
+
+2007-05-11  Rob Crittenden <rcritten@redhat.com>
+
+	* Patch from Bob Relyea
+	  * Adds support for some of the BIO API
+
+2007-04-25  Rob Crittenden <rcritten@redhat.com>
+
+	* A few casts to eliminate some compiler warnings.
+
+2007-04-25  Rob Crittenden <rcritten@redhat.com>
+
+	* Don't allow SSL_library_init to be called more than once
+	* Enable the SSL cache for servers
+
+2007-04-24  Rob Crittenden <rcritten@redhat.com>
+
+	* Cobbled function sftk_newPinCheck() from NSS to do password type and
+	  length enforcemen when in FIPS mode
+	* For some reason I had disabled setting ciphers. Re-enabled that and
+	  now enforce only FIPS-approved ciphers when the token is in FIPS mode.
+
+2007-04-24  Rob Crittenden <rcritten@redhat.com>
+
+	* Should use PR_USER_THREAD in PR_Init
+	* Add a close method for our layer
+
+2007-04-24  Rob Crittenden <rcritten@redhat.com>
+
+	* Implement SSL_CIPHER_get_version (possibly wrongly) and
+	  SSL_CIPHER_get_bits
+	* Fix using an NSS database with a password. Freeing the slot list
+	  was bad.
+
+2007-04-23  Rob Crittenden <rcritten@redhat.com>
+
+	* If a certificate cannot be found set an appropriate error so an
+	  OpenSSL app reports the right problem.
+	* Look in /etc/pki/nssdb if SSL_DIR is not set
+	* Implement the DEFAULT cipher keyword
+
+2007-04-23  Rob Crittenden <rcritten@redhat.com>
+
+	* Fill in some more of the RAND_ API
+
+2007-04-20  Rob Crittenden <rcritten@redhat.com>
+
+	* Start of project 

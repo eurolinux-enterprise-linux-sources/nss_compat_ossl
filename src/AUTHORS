@@ -1,0 +1,8 @@
+James Antill.  Started the project and set up basic scheme for things.
+
+Rob Crittenden.  Filled in many gaps and got basic client and server SSL
+working.
+
+Rich Megginson (20090306) Changed license to MIT style license
+
+Ondrej Vasik (20090420)  Contributed patch to catch NULL contexts in SSL_new().
