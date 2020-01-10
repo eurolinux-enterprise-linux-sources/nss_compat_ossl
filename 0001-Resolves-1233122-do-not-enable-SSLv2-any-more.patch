@@ -1,0 +1,90 @@
+From d5a837df904b6f411887d93332ac4572923b92bc Mon Sep 17 00:00:00 2001
+From: Kamil Dudka <kdudka@redhat.com>
+Date: Wed, 21 May 2014 14:43:56 +0200
+Subject: [PATCH] Resolves: #1233122 - do not enable SSLv2 any more
+
+---
+ src/ssl.c | 25 +++++++++----------------
+ 1 file changed, 9 insertions(+), 16 deletions(-)
+
+diff --git a/src/ssl.c b/src/ssl.c
+index 2ebb013..b37c0f4 100644
+--- a/src/ssl.c
++++ b/src/ssl.c
+@@ -1712,8 +1712,7 @@ int SSL_write(SSL *ssl, const void *buf, int num)
+     return rv;
+ }
+ 
+-SSL_METHOD *create_context(PRBool ssl2, PRBool ssl3, PRBool tlsv1, 
+-                           PRBool server)
++SSL_METHOD *create_context(PRBool ssl3, PRBool tlsv1, PRBool server)
+ {
+     PRFileDesc *s = NULL;
+     PRFileDesc *layer;
+@@ -1754,12 +1753,6 @@ SSL_METHOD *create_context(PRBool ssl2, PRBool ssl3, PRBool tlsv1,
+     if (SSL_OptionSet(s, SSL_HANDSHAKE_AS_SERVER, server) != SECSuccess)
+         goto error;
+ 
+-    if (SSL_OptionSet(s, SSL_ENABLE_SSL2, ssl2) != SECSuccess)
+-        goto error;
+-
+-    if (SSL_OptionSet(s, SSL_V2_COMPATIBLE_HELLO, ssl2) != SECSuccess)
+-        goto error;
+-
+     if (SSL_OptionSet(s, SSL_ENABLE_SSL3, ssl3)  != SECSuccess)
+         goto error;
+ 
+@@ -1816,42 +1809,42 @@ SSL_METHOD *create_context(PRBool ssl2, PRBool ssl3, PRBool tlsv1,
+ 
+ SSL_METHOD *SSLv2_client_method(void)
+ {
+-    return create_context(PR_TRUE, PR_FALSE, PR_FALSE, PR_FALSE);
++    return create_context(PR_FALSE, PR_FALSE, PR_FALSE);
+ }
+ 
+ SSL_METHOD *SSLv23_client_method(void)
+ {
+-    return create_context(PR_TRUE, PR_TRUE, PR_TRUE, PR_FALSE);
++    return create_context(PR_TRUE, PR_TRUE, PR_FALSE);
+ }
+ 
+ SSL_METHOD *SSLv3_client_method(void) 
+ {
+-    return create_context(PR_FALSE, PR_TRUE, PR_FALSE, PR_FALSE);
++    return create_context(PR_TRUE, PR_FALSE, PR_FALSE);
+ }
+ 
+ SSL_METHOD *TLSv1_client_method(void)
+ {
+-    return create_context(PR_FALSE, PR_FALSE, PR_TRUE, PR_FALSE);
++    return create_context(PR_FALSE, PR_TRUE, PR_FALSE);
+ }
+ 
+ SSL_METHOD *SSLv2_server_method(void)
+ {
+-    return create_context(PR_TRUE, PR_FALSE, PR_FALSE, PR_TRUE);
++    return create_context(PR_FALSE, PR_FALSE, PR_TRUE);
+ }
+ 
+ SSL_METHOD *SSLv23_server_method(void)
+ { 
+-    return create_context(PR_TRUE, PR_TRUE, PR_TRUE, PR_TRUE);
++    return create_context(PR_TRUE, PR_TRUE, PR_TRUE);
+ }
+ 
+ SSL_METHOD *SSLv3_server_method(void)
+ { 
+-    return create_context(PR_FALSE, PR_TRUE, PR_FALSE, PR_TRUE);
++    return create_context(PR_TRUE, PR_FALSE, PR_TRUE);
+ }
+ 
+ SSL_METHOD *TLSv1_server_method(void)
+ { 
+-    return create_context(PR_FALSE, PR_FALSE, PR_TRUE, PR_TRUE);
++    return create_context(PR_FALSE, PR_TRUE, PR_TRUE);
+ }
+ 
+ SSL_CTX *SSL_CTX_new(SSL_METHOD *passed)
+-- 
+1.8.3.1
+

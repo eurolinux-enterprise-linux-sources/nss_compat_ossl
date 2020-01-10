@@ -1,6 +1,6 @@
 Name:           nss_compat_ossl
 Version:        0.9.6
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Source-level compatibility library for OpenSSL to NSS porting
 
 Group:          System Environment/Libraries
@@ -8,6 +8,9 @@ License:        MIT
 URL:            http://rcritten.fedorapeople.org/nss_compat_ossl.html
 Source0:        http://rcritten.fedorapeople.org/%{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+
+# do not enable SSLv2 any more (#1233122)
+Patch1:         0001-Resolves-1233122-do-not-enable-SSLv2-any-more.patch
 
 # Need > 3.11.7-7 so we have the NSS PKCS#11 flat-file reader available 
 BuildRequires:  nss-devel > 3.11.7-7
@@ -27,6 +30,7 @@ Header and library files for doing porting work from OpenSSL to NSS.
 
 %prep
 %setup -q
+%patch1 -p1
 
 %build
 
@@ -65,6 +69,9 @@ rm -rf $RPM_BUILD_ROOT
 %postun -p /sbin/ldconfig
 
 %changelog
+* Fri Jun 19 2015 Kamil Dudka <kdudka@redhat.com> - 0.9.6-2
+- do not enable SSLv2 any more (#1233122)
+
 * Tue Mar 16 2010 Rob Crittenden <rcritten@redhat.com> - 0.9.6-1
 - Update to 0.9.6
 
