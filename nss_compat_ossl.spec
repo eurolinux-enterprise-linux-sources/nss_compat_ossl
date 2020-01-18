@@ -1,6 +1,6 @@
 Name:           nss_compat_ossl
 Version:        0.9.6
-Release:        8%{?dist}
+Release:        5%{?dist}
 Summary:        Source-level compatibility library for OpenSSL to NSS porting
 
 Group:          System Environment/Libraries
@@ -8,8 +8,6 @@ License:        MIT
 URL:            http://rcritten.fedorapeople.org/nss_compat_ossl.html
 Source0:        http://rcritten.fedorapeople.org/%{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-
-Patch1:		0001-Enable-ssl2_non-fatal.patch
 
 # Need > 3.11.7-7 so we have the NSS PKCS#11 flat-file reader available 
 BuildRequires:  nss-devel > 3.11.7-7
@@ -30,7 +28,6 @@ Header and library files for doing porting work from OpenSSL to NSS.
 
 %prep
 %setup -q
-%patch1 -p1 -b .ssl2_nonfatal
 
 %build
 
@@ -69,15 +66,6 @@ rm -rf $RPM_BUILD_ROOT
 %postun -p /sbin/ldconfig
 
 %changelog
-* Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 0.9.6-8
-- Mass rebuild 2014-01-24
-
-* Mon Jan 13 2014 Rob Crittenden <rcritten@redhat.com> - 0.9.6-7
-- Add patch to make failure to enable SSL2 non-fatal (#1033024)
-
-* Fri Dec 27 2013 Daniel Mach <dmach@redhat.com> - 0.9.6-7
-- Mass rebuild 2013-12-27
-
 * Thu Feb 14 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.9.6-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
 
