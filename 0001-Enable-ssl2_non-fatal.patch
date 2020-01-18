@@ -1,0 +1,21 @@
+diff -rupN nss_compat_ossl-0.9.6.orig/src/ssl.c nss_compat_ossl-0.9.6/src/ssl.c
+--- nss_compat_ossl-0.9.6.orig/src/ssl.c	2010-01-05 15:54:55.000000000 -0500
++++ nss_compat_ossl-0.9.6/src/ssl.c	2014-01-13 17:11:42.244457036 -0500
+@@ -1754,11 +1754,12 @@ SSL_METHOD *create_context(PRBool ssl2,
+     if (SSL_OptionSet(s, SSL_HANDSHAKE_AS_SERVER, server) != SECSuccess)
+         goto error;
+ 
+-    if (SSL_OptionSet(s, SSL_ENABLE_SSL2, ssl2) != SECSuccess)
+-        goto error;
+-
+-    if (SSL_OptionSet(s, SSL_V2_COMPATIBLE_HELLO, ssl2) != SECSuccess)
+-        goto error;
++    /* Don't fail if enabling SSL2 options doesn't succeed as it may
++     * be disabled in NSS. So just ignore the return value from
++     * SSL_OptionSet().
++     */
++    SSL_OptionSet(s, SSL_ENABLE_SSL2, ssl2);
++    SSL_OptionSet(s, SSL_V2_COMPATIBLE_HELLO, ssl2);
+ 
+     if (SSL_OptionSet(s, SSL_ENABLE_SSL3, ssl3)  != SECSuccess)
+         goto error;

@@ -1,0 +1,84 @@
+The purpose is to cause as few changes to the code you are trying to port as
+possible. Some changes are inevitable, particularly when crypto outside of
+SSL is being used, but for a general-purpose SSL client or server the goal
+is that 80% of the code can remain untouched.
+
+Currently Supports:
+
+    * Creating an SSL server listener and accepting requests
+    * Creating an SSL client socket and making requests
+    * Ciphers that should be compatible with OpenSSL
+    * Client certificate authentication
+    * Token password prompting/handlng 
+
+Requires:
+
+NSPR 4.6.4 or higher
+NSS 3.11.4 or higher
+
+How Do I Use the Library:
+
+For the short term you will need to use an NSS database. This consists of 3
+files: cert8.db, key3.db and secmod.db located in the same directory. In order
+for the target to find the right database you need to set the environment
+variable SSL_DIR to the location of your NSS database (unless you have a
+server cert installed in the default NSS database in /etc/pki/nssdb)
+
+The code doesn't currently support file-based certificates. It uses the path
+of the certificate passed to SSL_CTX_use_certificate_file() and
+SSL_CTX_use_certificate_chain_file() as the nickname of the certificate in
+the NSS database. To list the certificates (and their nickname) in an NSS
+database you can use this:
+
+% certutil -L -d /path/to/database
+
+If you have a PKCS#12 file containing you can import it into your NSS database
+with:
+
+% pk12util -i mycert.p12 -d /path/to/database
+
+We currently lack nice, importable autoconf rules. You will need to tell your
+application where to find the NSPR and NSS include and libraries. You can use
+pkg-config to determine this. The package names are nss and nspr.
+
+So far we are use HAVE_NSS and HAVE_OPENSSL to differentiate between NSS and
+OpenSSL.
+
+You want to include "nss_compat_ossl.h". Be careful to not include any OpenSSL
+header files.
+
+Some specific things to watch out for:
+
+- OpenSSL CRL handling is very different from NSS so any OpenSSL CRL handling
+code should be ifdef'd out. NSS handles CRLs directly. Users can use the
+crlutil tool to load them into the NSS database.
+
+- The callbacks for info_callback and verify_callback are made but from what
+I've seen those functions use very diverse OpenSSL calls that aren't supported
+yet (and may never be). These callbacks will likely all need to be rewritten
+for NSS.
+
+- Few of the BIO_ calls are implemented. If these are used extensively in the
+target application then some major rewriting may be needed. Best to request
+some assistance before proceeding.
+
+- I didn't use OpenSSL structures in most cases so any programs trying to
+access specific elements may need to change (or the library does).
+
+- NSS supports two modes for its SSL cache: threaded and multi-process. The
+nss_compat_ossl code currently initializes the cache for multi-threaded
+operation. If you need multi-process you will need to call these in your
+application: 
+
+    SSL_CTX_set_timeout(ctx, timeout);
+    SSL_ShutdownServerSessionIDCache();
+    SSL_ConfigMPServerSIDCache(0, timeout, timeout, NULL);
+
+Things to be done:
+
+- We should import referenced certificates on the fly into our NSS database.
+A PKCS#11 module to do this has been started but requires NSS 3.12 so it is
+of limited use in the short-term.
+
+- Many missing pieces of the API 
+
